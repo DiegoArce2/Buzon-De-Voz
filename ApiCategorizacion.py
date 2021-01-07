@@ -11,7 +11,6 @@ import soundfile as sf
 import sounddevice as sd
 import queue
 import time
-from feat_extract import *
 import time
 import argparse
 import numpy as np
@@ -31,15 +30,12 @@ from openpyxl import Workbook
 import pandas as pd
 from openpyxl import load_workbook 
 from datetime import date,datetime
-import pandas as pd
-from openpyxl import load_workbook
 import pandas.io.formats.excel
 import zipfile
 import json
 from keras import backend as K
 import tensorflow as tf
 from sklearn.metrics import roc_auc_score
-from pydub import AudioSegment
 nombreArchivo=""
 
 def verificarModelo(modelo):

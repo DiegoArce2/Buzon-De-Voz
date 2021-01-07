@@ -36,7 +36,11 @@ import json
 from keras import backend as K
 import tensorflow as tf
 from sklearn.metrics import roc_auc_score
+from pydub import AudioSegment
+
 nombreArchivo=""
+
+
 
 def verificarModelo(modelo):
     contenido = os.listdir('./data/')    
@@ -94,8 +98,26 @@ def BuscarModelo(mod):
             return x[1]
 
         
-    
+def detect_leading_silence(sound, silence_threshold=-50.0, chunk_size=10):
+    trim_ms = 0 # ms
 
+    assert chunk_size > 0 # to avoid infinite loop
+    while sound[trim_ms:trim_ms+chunk_size].dBFS < silence_threshold and trim_ms < len(sound):
+        trim_ms += chunk_size
+
+    return trim_ms
+
+def preprocesado(filePath):
+    sound = AudioSegment.from_file(filePath, format="wav")
+    start_trim = detect_leading_silence(sound)
+    end_trim = detect_leading_silence(sound.reverse())
+
+    duration = len(sound)    
+    trimmed_sound = sound[start_trim:duration-end_trim]
+    if(trimmed_sound.duration_seconds>1):
+        trimmed_sound.export(filePath,format="wav")
+        print("audio: "+str(filePath)+" pre-procesado")
+    
 
 
 
@@ -113,14 +135,6 @@ def parse_predict_files(archivo,parent_dir,file_ext='*.wav'):
             return np.array(features), np.array(filenames)
 
 
-def detect_leading_silence(sound, silence_threshold=-50.0, chunk_size=10):
-    trim_ms = 0 # ms
-
-    assert chunk_size > 0 # to avoid infinite loop
-    while sound[trim_ms:trim_ms+chunk_size].dBFS < silence_threshold and trim_ms < len(sound):
-        trim_ms += chunk_size
-
-    return trim_ms
 
 
 
@@ -130,6 +144,7 @@ start = time.time()
 
 def extract_feature(file_name=None):
     if file_name: 
+        preprocesado(file_name)
         print('Extracting', file_name,' Tiempo actual: ',(time.time()-start))
         X, sample_rate = sf.read(file_name, dtype='float32')
     else:  
@@ -155,27 +170,8 @@ def extract_feature(file_name=None):
 
     return mfccs,mel
 
-from pydub import AudioSegment
 
-def detect_leading_silence(sound, silence_threshold=-50.0, chunk_size=10):
-    trim_ms = 0 # ms
 
-    assert chunk_size > 0 # to avoid infinite loop
-    while sound[trim_ms:trim_ms+chunk_size].dBFS < silence_threshold and trim_ms < len(sound):
-        trim_ms += chunk_size
-
-    return trim_ms
-
-from pydub import AudioSegment
-
-def detect_leading_silence(sound, silence_threshold=-50.0, chunk_size=10):
-    trim_ms = 0 # ms
-
-    assert chunk_size > 0 # to avoid infinite loop
-    while sound[trim_ms:trim_ms+chunk_size].dBFS < silence_threshold and trim_ms < len(sound):
-        trim_ms += chunk_size
-
-    return trim_ms
 
 def parse_audio_files(parent_dir,file_ext='*.wav'):
     sub_dirs = os.listdir(parent_dir)
@@ -185,6 +181,7 @@ def parse_audio_files(parent_dir,file_ext='*.wav'):
         if os.path.isdir(os.path.join(parent_dir, sub_dir)):
             for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
                 try:
+                    
                     mfccs,mel= extract_feature(fn)
                 except Exception as e:
                     print("[Error] extract feature error in %s. %s" % (fn,e))

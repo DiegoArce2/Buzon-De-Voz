@@ -1,6 +1,14 @@
 # Buzon-De-Voz
 Proyecto encargado por la empresa Xentric para detectar buzones de voz en su bot telefonico y asi ahorrar recursos.
 
+# Funciones
+-Crear modelo.<br>
+-Crear categorias.<br>
+-Subir archivos de entrenamiento.<br>
+-Entrenar Modelo.<br>
+-Categorizar audio.<br>
+
+
 # Bibliotecas necesarias:
 -Flask<br>
 -Os<br>
@@ -29,3 +37,6 @@ Proyecto encargado por la empresa Xentric para detectar buzones de voz en su bot
 -Directorio models: Se almacenan los modelos ya entrenados.<br>
 -Directorio npys: Se almacenan los datos extraidos de los audios de cada modelo.<br>
 -Directorio predict: Se almacena temporalmente el audio a categorizar.<br>
+
+# Enlaces que podrian interesarte
+-https://documenter.getpostman.com/view/13648495/TVzLpfjn

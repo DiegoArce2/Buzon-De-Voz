@@ -10,25 +10,25 @@ Proyecto encargado por la empresa Xentric para detectar buzones de voz en su bot
 
 
 # Bibliotecas necesarias:
--Flask<br>
--Os<br>
--Glob<br>
--Librossa<br>
--Numpy<br>
--Matplotlib<br>
--Soundfile<br>
--Keras<br>
--Pandas<br>
--Openpyxl<br>
--Zipfile<br>
--Json<br>
--Tensorflow<br>
+-Flask.<br>
+-Os.<br>
+-Glob.<br>
+-Librossa.<br>
+-Numpy.<br>
+-Matplotlib.<br>
+-Soundfile.<br>
+-Keras.<br>
+-Pandas.<br>
+-Openpyxl.<br>
+-Zipfile.<br>
+-Json.<br>
+-Tensorflow.<br>
 
 # Archivos importantes:
  -Archivo "ApiCategorizacion.py": En este archivo se ejecuta todo el trabajo incluyendo el modelo y el api.<br>
  -Archivo "Log.xlsx": En este archivo se guarda la informacion de:<br>
-  -Errores<br>
-  -Entrenamientos<br>
+  -Errores.<br>
+  -Entrenamientos.<br>
   -Categorizaciones.<br>
 
 # Directorios:
@@ -38,5 +38,5 @@ Proyecto encargado por la empresa Xentric para detectar buzones de voz en su bot
 -Directorio npys: Se almacenan los datos extraidos de los audios de cada modelo.<br>
 -Directorio predict: Se almacena temporalmente el audio a categorizar.<br>
 
-# Enlaces que podrian interesarte
+# Enlaces de interés
 -https://documenter.getpostman.com/view/13648495/TVzLpfjn

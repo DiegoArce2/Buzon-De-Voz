@@ -1,5 +1,4 @@
 from flask import Flask, request,jsonify
-from librosa.util import exceptions
 from werkzeug.utils import secure_filename
 import os
 import glob
@@ -38,6 +37,7 @@ from keras import backend as K
 import tensorflow as tf
 from sklearn.metrics import roc_auc_score
 from pydub import AudioSegment
+
 nombreArchivo=""
 
 
@@ -93,7 +93,7 @@ CargaModelos()
 def BuscarModelo(mod):
     print("ss"+mod)
     for x in modelsCargados:
-        if x[0]=="model"+str(mod).lower():
+        if x[0]=="Model"+str(mod).lower():
             print(x[0])
             return x[1]
 
@@ -127,10 +127,7 @@ def parse_predict_files(archivo,parent_dir,file_ext='*.wav'):
     filenames = []
     for fn in glob.glob(os.path.join(parent_dir, file_ext)):
         nombre=fn.replace("predict\\", "")
-        nombre=nombre.replace("predict/", "")
-        print(archivo+"-"+nombre)
         if nombre==archivo:
-            print("entro en parse")
             mfccs,mel= extract_feature(fn)
             ext_features = np.hstack([mfccs,mel])
             features = np.vstack([features,ext_features])
@@ -304,7 +301,7 @@ def train(modelo):
 def crearModelo():
     if request.method == "POST":
         if 'modelo' in request.form:
-            modelo="model"+str(request.form["modelo"]).lower()
+            modelo="Model"+str(request.form["modelo"]).lower()
             if verificarModelo(modelo):
                 return '{"response":"El modelo ya existe","resp":"False"}'   
             else:
@@ -319,7 +316,7 @@ def crearModelo():
 def entrenar():
     if request.method == "POST":
         if 'modelo' in request.form:
-            modelo="model"+str(request.form["modelo"])
+            modelo="Model"+str(request.form["modelo"])
             features, labels = parse_audio_files('./data/'+modelo+"/")
             np.save('./npys/feat'+modelo+'.npy', features)
             np.save('./npys/label'+modelo+'.npy', labels)
@@ -338,7 +335,7 @@ def createCategory():
             if 'modelo' in request.form and 'categoria' in request.form:
                 categoria = request.form["categoria"]
                 modelo = request.form["modelo"]
-                modelo="model"+modelo.lower()
+                modelo="Model"+modelo
                 resp=verificarModelo(modelo)
                 print(resp)
                 if resp:
@@ -358,8 +355,8 @@ def createCategory():
                 return '{"response":"Verifique los parametros","resp":"False"}'
         else:
             return '{"response":"Indique el modelo a entrenar","resp":"False"}'    
-    except Exception as ex:
-        return '{"response":"Verwifique Parametros'+str(ex)+'","resp":"False"}'
+    except:
+        return '{"response":"Verifique Parametros","resp":"False"}'
 
 
             
@@ -376,7 +373,7 @@ def upload_cateogory_file():
                 if extension==".zip":
                     categoria = request.form["categoria"]
                     modelo = request.form["modelo"]
-                    modelo="model"+modelo
+                    modelo="Model"+modelo
                     resp=verificarModelo(modelo)
                     if resp:    
                         resp=verificarExistencia(modelo,categoria)
@@ -412,18 +409,12 @@ def upload_file():
                 f = request.files["file"]
                 modelo = request.form["modelo"]
                 try:
-
-                    lista = os.listdir('./data/model'+str(modelo))
-                    lista.sort()
-                    print(lista)
-                except Exception as ex:
-    #                writeError("El modelo seleccionado no existe")
-                    
-                    return '{"response":"Verifique los parametros"'+str(ex)+',"resp":"False"}'
-                
+                    lista = os.listdir('./data/Model'+str(modelo))
+                except:
+                    writeError("El modelo seleccionado no existe")
+                    return '{"response":"Verifique los parametros","resp":"False"}'
                 extension = os.path.splitext(f.filename)[1]
-                
-                if os.path.isfile('./models/model'+str(modelo)+'.h5'):
+                if os.path.isfile("./models/Model"+str(modelo)+".h5"):
                     if extension==".wav":
                         nombreArchivo=str(randint(0,999999999999999))+".wav"
                         existe=True
@@ -434,9 +425,8 @@ def upload_file():
                                 existe=False
                         nombreArchivo=str(nombreArchivo)+".wav"
                         f.save(os.path.join("predict", nombreArchivo))
-                        print(nombreArchivo)
                         X_predict, filenames = parse_predict_files(nombreArchivo,'predict')
-                        if op.exists('./models/model'+str(modelo)+'.h5'):
+                        if op.exists("./models/Model"+str(modelo)+".h5"):
                             model = BuscarModelo(str(modelo))
                             X_predict = np.expand_dims(X_predict, axis=2)
                             pred = model.predict(X_predict)
@@ -448,7 +438,31 @@ def upload_file():
                                 print(nombre+": "+str(pos+1)+" Exactitud: "+str(maxi))
                                 
 
-                
+                                data=len(pd.read_excel("log.xlsx"))+1
+                                book = load_workbook('log.xlsx')
+                                writer = pd.ExcelWriter('log.xlsx', engine='openpyxl') 
+                                writer.book = book
+                                pandas.io.formats.excel.header_style = None
+                                ip=request.remote_addr
+                                #datos log
+                                fecha  = pd.DataFrame([date.today().strftime('%d-%m-%Y')])
+                                hora  = pd.DataFrame([datetime.now().strftime('%H:%M:%S')])
+                                claseid=pd.DataFrame([str(pos+1)])
+                                clase=pd.DataFrame([str(lista[pos])])
+                                model=pd.DataFrame([str(modelo)])
+                                ipCliente=pd.DataFrame([ip])
+                                Exactitud=pd.DataFrame([maxi])
+                                writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+                                fecha.to_excel(writer, "Hoja1",  index = False,startrow=data,header=None,startcol=0) 
+                                hora.to_excel(writer, "Hoja1",  index = False,startrow=data,header=None,startcol=1) 
+                                claseid.to_excel(writer, "Hoja1",  index = False,startrow=data,header=None,startcol=2) 
+                                clase.to_excel(writer, "Hoja1",  index = False,startrow=data,header=None,startcol=3) 
+                                Exactitud.to_excel(writer, "Hoja1",  index = False,startrow=data,header=None,startcol=4) 
+                                ipCliente.to_excel(writer, "Hoja1",  index = False,startrow=data,header=None,startcol=5) 
+                                model.to_excel(writer, "Hoja1",  index = False,startrow=data,header=None,startcol=6) 
+
+                                writer.save()
+                                #fin datos log
                             try:
                                 remove("predict/"+nombreArchivo)
                             except Exception as e:
@@ -456,18 +470,16 @@ def upload_file():
 
                             return '{"categoria":"'+str(pos+1)+'","exactitud":"'+str(maxi)+'","descripcion":"'+str(lista[pos])+'"}'
                         else:
-              #              writeError("Modelo no existente")
+                            writeError("Modelo no existente")
                             return '{"response":"El modelo seleccionado no existe","resp":"False"}'
 
                     else:
-             #           writeError("Extencion no permitida")
+                        writeError("Extencion no permitida")
                         return '{"response":"Extencion de archivo no permitida","resp":"False"}'
-                else:
-                    return '{"response":"Modelo no existente","resp":"False"}'
             else:
                  return '{"response":"Verifique parametros","resp":"False"}'
         else:
-            #writeError("El modelo seleccionado no existe")
+            writeError("El modelo seleccionado no existe")
             return '{"response":"El modelo seleccionado no existe","resp":"False"}'
     except ValueError as x:
         print(x)
@@ -501,7 +513,6 @@ def verModelosEntrenados():
             lista=[]
             for e in contenido:
                 name=e.replace("Model", "")
-                name=e.replace("model", "")
                 name=name.replace(".H5", "")
                 name=name.replace(".h5", "")
                 lista.append(name)
@@ -517,7 +528,6 @@ def verModeTodosLosModelos():
     for e in contenido:
         clases = os.listdir('./data/'+e)
         name=e.replace("Model", "",1)
-        name=e.replace("model", "",1)
         name=name.replace("model", "",1)
         name=name.lower()
         clas=[]
@@ -543,4 +553,4 @@ def verModeTodosLosModelos():
 
 if __name__ == "__main__":
     #app.run(ssl_context=('https/cert.pem', 'https/key.pem'))
-    app.run(port=3432,debug=True)
+    app.run()

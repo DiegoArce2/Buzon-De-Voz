@@ -27,9 +27,9 @@ Proyecto encargado por la empresa Xentric para detectar buzones de voz en su bot
 # Archivos importantes:
  -Archivo "ApiCategorizacion.py": En este archivo se ejecuta todo el trabajo incluyendo el modelo y el api.<br>
  -Archivo "Log.xlsx": En este archivo se guarda la informacion de:<br>
-  -Errores.<br>
-  -Entrenamientos.<br>
-  -Categorizaciones.<br>
+  &nbsp;-Errores.<br>
+  &nbsp;-Entrenamientos.<br>
+  &nbsp;-Categorizaciones.<br>
 
 # Directorios:
 -Directorio data: Aqui se almacenan las categorias y los archivos de entrenamiento de los modelos.<br>
